@@ -16,6 +16,7 @@ plugins:
     - help
     - debug
     - apiserver
+    - talk
 
 # apiserver plugin configration
 api_port:  3200
