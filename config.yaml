@@ -17,6 +17,8 @@ plugins:
     - debug
     - apiserver
     - talk
+    - roll
+    - whoisit
 
 # apiserver plugin configration
 api_port:  3200

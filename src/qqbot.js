@@ -561,7 +561,7 @@ var QQBot = (function() {
       });
       msg.from_user = this.get_user_ingroup(msg.from_uin, msg.from_gid);
       if (!msg.from_group) {
-        this.update_group_list;
+        this.update_group_list();
       }
       if (!msg.from_user) {
         this.update_group_member({
