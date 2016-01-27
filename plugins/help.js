@@ -65,7 +65,4 @@ module.exports = function(content, send, robot, message) {
     memory = process.memoryUsage().rss / 1024 / 1024;
     send("up " + day + " days, " + (t(hour)) + ":" + (t(minute)) + ":" + (t(second)) + " | mem: " + (memory.toFixed(1)) + "M");
   }
-  if (content.match(/^roll$/i)) {
-    return send(Math.round(Math.random() * 100));
-  }
 };
