@@ -15,6 +15,7 @@ plugins:
     - talk
     - roll
     - flush
+    - hitokoto
 
 # apiserver plugin configration
 api_port:  3200

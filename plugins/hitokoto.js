@@ -6,14 +6,11 @@
 
 module.exports = function(content, send, robot, message) {
   if (content.match(/^comic$/i)) {
-    return robot.request.get({
-      url: "http://api.hitokoto.us/rand",
-      json: true
-    }, function(e, r, data) {
+    return robot.request.get("http://api.hitokoto.us/rand", function(data, err) {
       if (data && data.hitokoto) {
         return send(data.hitokoto + " --" + data.source);
       } else {
-        return send(e);
+        return send(err);
       }
     });
   }

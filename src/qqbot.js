@@ -3,6 +3,7 @@ var api = require('./qqapi');
 var Log = require('log');
 var Dispatcher = require('./dispatcher');
 var log = new Log('debug');
+var request = require('./httpclient');
 
 var MsgType = {
   Default: 'message',
@@ -34,6 +35,7 @@ var QQBot = (function() {
     this.api = api;
     this.dispatcher = new Dispatcher(this.config.plugins, this);
     this.started = true;
+    this.request = request;
   }
 
   QQBot.prototype.save_group_member = function(group, info) {
