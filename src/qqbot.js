@@ -150,7 +150,7 @@ const QQBot = (function () {
 
   QQBot.prototype.update_buddy_list = function (callback) {
     log.info('fetching buddy list...');
-    var self = this;
+    const self = this;
     return this.api.get_buddy_list(this.auth, function (ret, e) {
       if (e) {
         log.error(e);
@@ -158,8 +158,8 @@ const QQBot = (function () {
       } else {
         if (ret.retcode === 0) {
           self.buddy_info = ret.result;
-          var info = self.buddy_info.info;
-          var n = info.length;
+          const info = self.buddy_info.info;
+          let n = info.length;
           if (n > 0) {
             info.forEach(function (inf) {
               self.get_user_account(inf.uin, function (err, account) {
@@ -178,8 +178,7 @@ const QQBot = (function () {
   };
 
   QQBot.prototype.update_group_member = function (options, callback) {
-    var group;
-    group = options.code ? options : this.get_group(options);
+    const group = options.code ? options : this.get_group(options);
     return this.api.get_group_member(group.code, this.auth, (function (_this) {
       return function (ret, e) {
         if (ret.retcode === 0) {
@@ -211,9 +210,8 @@ const QQBot = (function () {
   };
 
   QQBot.prototype.update_dgroup_member = function (dgroup, callback) {
-    var did;
     log.info('update discuss group member ' + dgroup.did);
-    did = dgroup.did;
+    const did = dgroup.did;
     return this.api.get_discuss_member(did, this.auth, (function (_this) {
       return function (ret, e) {
         if (ret.retcode === 0) {
@@ -227,16 +225,16 @@ const QQBot = (function () {
   };
 
   QQBot.prototype.update_all_group_member = function (callback) {
-    var all, finished, group, groups, i, len, results, successed;
-    finished = successed = 0;
-    groups = this.group_info.gnamelist || [];
-    all = groups.length;
+    let finished = 0;
+    let successed = 0;
+    const groups = this.group_info.gnamelist || [];
+    const all = groups.length;
     if (all === 0) {
       callback(true, 0, 0);
     }
-    results = [];
-    for (i = 0, len = groups.length; i < len; i++) {
-      group = groups[i];
+    const results = [];
+    for (let i = 0, len = groups.length; i < len; i++) {
+      const group = groups[i];
       results.push(this.update_group_member(group, function (ret, error) {
         finished += 1;
         successed += ret;
@@ -253,27 +251,25 @@ const QQBot = (function () {
   };
 
   QQBot.prototype.update_all_members = function (callback) {
-    var actions, check;
-    actions = {
+    const actions = {
       buddy: [0, 0],
       group: [0, 0],
       groupmember: [0, 0]
     };
-    check = function () {
-      var all, finished, i, item, key, len, stats, successed, value;
-      finished = successed = 0;
-      all = Object.keys(actions).length;
-      stats = (function () {
-        var results;
-        results = [];
-        for (key in actions) {
-          value = actions[key];
+    const check = function () {
+      let finished = 0;
+      let successed = 0;
+      const all = Object.keys(actions).length;
+      const stats = (function () {
+        const results = [];
+        for (const key in actions) {
+          const value = actions[key];
           results.push(value);
         }
         return results;
       })();
-      for (i = 0, len = stats.length; i < len; i++) {
-        item = stats[i];
+      for (let i = 0, len = stats.length; i < len; i++) {
+        const item = stats[i];
         finished += item[0];
         successed += item[1];
       }
@@ -307,87 +303,84 @@ const QQBot = (function () {
   };
 
   QQBot.prototype.get_account_info_general = function (table, uin, type, callback) {
-    var acc, call_callbacks, callbacks, info, key;
-    key = 'uin' + uin;
-    if (info = table[key]) {
-      if (acc = info.account) {
-        return callback(null, acc);
+    const key = 'uin' + uin;
+    let info = null;
+    if ((info = table[key])) {
+      if (info.account) {
+        return callback(null, info.account);
       } else {
         return info.callbacks.push(callback);
       }
     } else {
-      callbacks = [callback];
+      const callbacks = [callback];
       table[key] = {
         callbacks: callbacks
       };
-      call_callbacks = function (err, account) {
-        var func, i, len, results;
-        results = [];
-        for (i = 0, len = callbacks.length; i < len; i++) {
-          func = callbacks[i];
+      const call_callbacks = function (err, account) {
+        const results = [];
+        for (let i = 0, len = callbacks.length; i < len; i++) {
+          const func = callbacks[i];
           results.push(func(err, account));
         }
         return results;
       };
       log.info('fetching account info: type' + type + ', uin' + uin);
-      return this.api.get_friend_uin2(uin, type, this.auth, (function (_this) {
+      return this.api.get_friend_uin2(uin, type, this.auth, (function () {
         return function (ret, e) {
-          var account, account_key, func, funcs, i, len, ref, result;
           delete table[key];
           if (!ret) {
             call_callbacks({}, null);
             return;
           }
           if (ret.retcode === 0) {
-            result = table[key] = ret.result;
+            const result = table[key] = ret.result;
             if (type === 4) {
               // result.account -= 3890000000;
             }
-            account = result.account;
-            account_key = 'acc' + account;
-            funcs = (ref = table[account_key]) != null ? ref.callbacks : void 0;
+            const account = result.account;
+            const account_key = 'acc' + account;
             table[account_key] = result;
-            if (funcs) {
-              for (i = 0, len = funcs.length; i < len; i++) {
-                func = funcs[i];
-                func(null, uin);
+            if (table[account_key]) {
+              const funcs = table[account_key].callbacks;
+              if (funcs) {
+                for (let i = 0, len = funcs.length; i < len; i++) {
+                  const func = funcs[i];
+                  func(null, uin);
+                }
               }
             }
             return call_callbacks(null, account);
-          } else {
-            return call_callbacks(ret, null);
           }
+          return call_callbacks(ret, null);
         };
       })(this));
     }
   };
 
   QQBot.prototype.get_uin_general = function (table, account, callback) {
-    var info, key, uin;
-    key = 'acc' + account;
-    if (info = table[key]) {
-      if (uin = info.uin) {
+    const key = 'acc' + account;
+    const info = table[key];
+    if (info) {
+      const uin = info.uin;
+      if (uin) {
         if (callback) {
           callback(null, uin);
         }
         return uin;
-      } else {
-        info.callbacks.push(callback);
-        return null;
       }
-    } else {
-      if (callback) {
-        table[key] = {
-          callbacks: [callback]
-        };
-      }
+      info.callbacks.push(callback);
       return null;
     }
+    if (callback) {
+      table[key] = {
+        callbacks: [callback]
+      };
+    }
+    return null;
   };
 
   QQBot.prototype.get_user_account = function (uin_or_user, callback) {
-    var uin;
-    uin = typeof uin_or_user === 'object' ? uin_or_user.uin : uin_or_user;
+    const uin = typeof uin_or_user === 'object' ? uin_or_user.uin : uin_or_user;
     return this.get_account_info_general(this.user_account_table, uin, 1, callback);
   };
 
@@ -396,8 +389,7 @@ const QQBot = (function () {
   };
 
   QQBot.prototype.get_group_account = function (gid_or_group, callback) {
-    var uin;
-    uin = typeof gid_or_group === 'object' ? gid_or_group.gid : gid_or_group;
+    const uin = typeof gid_or_group === 'object' ? gid_or_group.gid : gid_or_group;
     return this.get_account_info_general(this.group_account_table, uin, 4, callback);
   };
 
@@ -406,7 +398,7 @@ const QQBot = (function () {
   };
 
   QQBot.prototype.on_die = function (callback) {
-    return this.cb_die = callback;
+    this.cb_die = callback;
   };
 
   QQBot.prototype.runloop = function (callback) {
@@ -438,15 +430,13 @@ const QQBot = (function () {
   };
 
   QQBot.prototype.send_message = function (uin_or_user, content, callback) {
-    var uin;
-    uin = typeof uin_or_user === 'object' ? uin_or_user.uin : uin_or_user;
+    const uin = typeof uin_or_user === 'object' ? uin_or_user.uin : uin_or_user;
     log.info('send msg ' + content + ' to user' + uin);
     return api.send_msg_2buddy(uin, content, this.auth, callback);
   };
 
   QQBot.prototype.send_message_to_group = function (gid_or_group, content, callback) {
-    var gid;
-    gid = typeof gid_or_group === 'object' ? gid_or_group.gid : gid_or_group;
+    const gid = typeof gid_or_group === 'object' ? gid_or_group.gid : gid_or_group;
     log.info('send msg ' + content + ' to group' + gid);
     return api.send_msg_2group(gid, content, this.auth, callback);
   };
@@ -473,23 +463,22 @@ const QQBot = (function () {
     }
     if (this.cb_die) {
       return this.cb_die();
-    } else {
-      return process.exit(1);
     }
+    process.exit(1);
   };
 
   QQBot.prototype.handle_poll_responce = function (resp, e) {
     if (e) {
       log.error('poll with error ' + e);
     }
-    var code = resp ? resp.retcode : -1;
+    const code = resp ? resp.retcode : -1;
     switch (code) {
     case -1:
       return log.error('resp is null, error on parse ret', resp);
     case 0:
-      var results = [];
+      const results = [];
       if (resp.result) {
-        var self = this;
+        const self = this;
         resp.result.forEach(function (event) {
           results.push(self._handle_poll_event(event));
         });
@@ -509,7 +498,6 @@ const QQBot = (function () {
     }
   };
 
-
   /*
     重新登录获取token
     @callback success:bool
@@ -517,7 +505,7 @@ const QQBot = (function () {
 
   QQBot.prototype.relogin = function (callback) {
     log.info('relogin...');
-    var self = this;
+    const self = this;
     log.debug('before', self.auth);
     return auth.auto_login(self.auth.ptwebqq, function (cookies, auth_info) {
       self.auth = auth_info;
@@ -528,7 +516,8 @@ const QQBot = (function () {
 
   QQBot.prototype._update_ptwebqq = function (ret) {
     log.debug('need to update ptwebqq ', ret);
-    return this.auth.ptwebqq = ret.p;
+    this.auth.ptwebqq = ret.p;
+    return this.auth.ptwebqq;
   };
 
   QQBot.prototype._handle_poll_event = function (event) {
@@ -548,9 +537,8 @@ const QQBot = (function () {
   };
 
   QQBot.prototype._on_message = function (event, msg_type) {
-    var msg, replied, reply, value;
-    value = event.value;
-    msg = {
+    const value = event.value;
+    const msg = {
       content: value.content.slice(-1).pop(), // .trim(),
       time: new Date(value.time * 1000),
       from_uin: value.from_uin,
@@ -573,15 +561,17 @@ const QQBot = (function () {
           gid: msg.from_gid
         });
       }
-      if (msg.from_group == null) {
+      if (!msg.from_group) {
         msg.from_group = {};
       }
-      if (msg.from_user == null) {
+      if (!msg.from_user) {
         msg.from_user = {};
       }
       try {
         log.debug('[群组消息]', '[' + msg.from_group.name + '] ' + msg.from_user.nick + ':' + msg.content + ' ' + msg.time);
-      } catch (undefined) {}
+      } catch (err) {
+        console.error(err);
+      }
     } else if (msg_type === MsgType.Discuss) {
       msg.from_did = value.did;
       msg.from_uin = value.send_uin;
@@ -597,15 +587,17 @@ const QQBot = (function () {
           did: value.did
         });
       }
-      if (msg.from_dgroup == null) {
+      if (!msg.from_dgroup) {
         msg.from_dgroup = {};
       }
-      if (msg.from_user == null) {
+      if (!msg.from_user) {
         msg.from_user = {};
       }
       try {
         log.debug('[讨论组消息]', '[' + msg.from_dgroup.name + '] ' + msg.from_user.nick + ':' + msg.content + ' ' + msg.time);
-      } catch (undefined) {}
+      } catch (err) {
+        console.error(err);
+      }
     } else if (msg_type === MsgType.Default) {
       msg.from_user = this.get_user(msg.from_uin);
       if (!msg.from_user) {
@@ -613,7 +605,9 @@ const QQBot = (function () {
       }
       try {
         log.debug('[好友消息]', msg.from_user.nick + ':' + msg.content + ' ' + msg.time);
-      } catch (undefined) {}
+      } catch (err) {
+        console.error(err);
+      }
     } else if (msg_type === MsgType.Sess) {
       msg.from_gid = value.id;
       msg.from_uin = value.from_uin;
@@ -629,26 +623,29 @@ const QQBot = (function () {
           gid: msg.from_gid
         });
       }
-      if (msg.from_group == null) {
+      if (!msg.from_group) {
         msg.from_group = {};
       }
-      if (msg.from_user == null) {
+      if (!msg.from_user) {
         msg.from_user = {};
       }
       try {
         log.debug('[临时消息]', msg.from_user.nick + ':' + msg.content + ' ' + msg.time);
-      } catch (undefined) {}
+      } catch (err) {
+        console.error(err);
+      }
     }
     if (this.config.offline_msg_keeptime && new Date().getTime() - msg.time.getTime() > this.config.offline_msg_keeptime * 1000) {
       return;
     }
-    replied = false;
-    reply = (function (_this) {
+    let replied = false;
+    const reply = (function (_this) {
       return function (content) {
         if (!replied) {
           _this.reply_message(msg, content);
         }
-        return replied = true;
+        replied = true;
+        return replied;
       };
     })(this);
     return this.dispatcher.dispatch(msg.content, reply, this, msg);
@@ -663,12 +660,11 @@ const QQBot = (function () {
         return _this.update_group_member({
           name: name
         }, function (ret, error) {
-          var group, groupinfo;
           log.info('√ group memeber fetched');
-          groupinfo = _this.get_group({
+          const groupinfo = _this.get_group({
             name: name
           });
-          group = new Group(_this, groupinfo.gid);
+          const group = new Group(_this, groupinfo.gid);
           _this.dispatcher.add_listener([group, 'dispatch']);
           return callback(group);
         });
@@ -677,9 +673,7 @@ const QQBot = (function () {
   };
 
   return QQBot;
-
 })();
-
 
 /*
   为hubot专门使用，提供两个方法
